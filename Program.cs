@@ -18,6 +18,20 @@ namespace Step2Issue {
             _trainingDataView = _mlContext.Data.LoadFromTextFile<GitHubIssue> (_trainDataPath, hasHeader : true);
 
         }
-      
+        public static IEstimator<ITransformer> ProcessData () {
+            var pipeline = _mlContext.Transforms.Conversion.MapValueToKey (inputColumnName: "Area", outputColumnName: "Label")
+                .Append (_mlContext.Transforms.Text
+                    .FeaturizeText (
+                        inputColumnName: "Title",
+                        outputColumnName: "TitleFeaturized"))
+                .Append (_mlContext.Transforms.Text
+                    .FeaturizeText (
+                        inputColumnName: "Description",
+                        outputColumnName: "DescriptionFeaturized"))
+                .AppendCacheCheckpoint (_mlContext);
+
+            return pipeline;
+        }
+
     }
 }
