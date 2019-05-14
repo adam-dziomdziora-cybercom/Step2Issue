@@ -15,11 +15,16 @@ namespace Step2Issue {
         private static ITransformer _trainedModel;
         static IDataView _trainingDataView;
         static void Main (string[] args) {
-            _trainingDataView = _mlContext.Data.LoadFromTextFile<GitHubIssue> (_trainDataPath, hasHeader : true);
+            _trainingDataView = _mlContext.Data.LoadFromTextFile<GitHubIssue> (
+                _trainDataPath, hasHeader : true);
+
+            var pipeline = ProcessData ();
+            var trainingPipeline = BuildAndTrainModel (_trainingDataView, pipeline);
 
         }
         public static IEstimator<ITransformer> ProcessData () {
-            var pipeline = _mlContext.Transforms.Conversion.MapValueToKey (inputColumnName: "Area", outputColumnName: "Label")
+            var pipeline = _mlContext.Transforms.Conversion
+                .MapValueToKey (inputColumnName: "Area", outputColumnName: "Label")
                 .Append (_mlContext.Transforms.Text
                     .FeaturizeText (
                         inputColumnName: "Title",
@@ -31,6 +36,17 @@ namespace Step2Issue {
                 .AppendCacheCheckpoint (_mlContext);
 
             return pipeline;
+        }
+
+        public static IEstimator<ITransformer> BuildAndTrainModel (
+            IDataView trainingDataView, IEstimator<ITransformer> pipeline) {
+            var trainingPipeline = pipeline
+                .Append (_mlContext.MulticlassClassification.Trainers
+                    .SdcaMaximumEntropy ("Label", "Features"))
+                .Append (_mlContext.Transforms.Conversion
+                    .MapKeyToValue ("PredictedLabel"));
+
+            return null;
         }
 
     }
