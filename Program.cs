@@ -81,7 +81,16 @@ namespace Step2Issue {
             Console.WriteLine ($"*       LogLoss:          {testMetrics.LogLoss:#.###}");
             Console.WriteLine ($"*       LogLossReduction: {testMetrics.LogLossReduction:#.###}");
             Console.WriteLine ($"*************************************************************************************************************");
+            SaveModelAsFile (_mlContext, trainingDataViewSchema, _trainedModel);
 
+        }
+
+        private static void SaveModelAsFile (MLContext mlContext, DataViewSchema trainingDataViewSchema, ITransformer model) {
+            // <SnippetSaveModel> 
+            mlContext.Model.Save (model, trainingDataViewSchema, _modelPath);
+            // </SnippetSaveModel>
+
+            Console.WriteLine ("The model is saved to {0}", _modelPath);
         }
 
     }
