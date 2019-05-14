@@ -23,7 +23,7 @@ namespace Step2Issue {
             var pipeline = ProcessData ();
             var trainingPipeline = BuildAndTrainModel (_trainingDataView, pipeline);
             Evaluate (_trainingDataView.Schema);
-
+            PredictIssue ();
         }
         public static IEstimator<ITransformer> ProcessData () {
             var pipeline = _mlContext.Transforms.Conversion
@@ -91,6 +91,33 @@ namespace Step2Issue {
             // </SnippetSaveModel>
 
             Console.WriteLine ("The model is saved to {0}", _modelPath);
+        }
+
+        public static void PredictIssue () {
+            // <SnippetLoadModel>
+            ITransformer loadedModel = _mlContext.Model.Load (_modelPath, out var modelInputSchema);
+            // </SnippetLoadModel>
+
+            // <SnippetAddTestIssue> 
+            GitHubIssue singleIssue = new GitHubIssue () {
+                Title = "Entity Framework crashes",
+                Description = "When connecting to the database, EF is crashing"
+            };
+            // </SnippetAddTestIssue> 
+
+            //Predict label for single hard-coded issue
+            // <SnippetCreatePredictionEngine>
+            _predEngine = _mlContext.Model.CreatePredictionEngine<GitHubIssue, IssuePrediction> (loadedModel);
+            // </SnippetCreatePredictionEngine>
+
+            // <SnippetPredictIssue>
+            var prediction = _predEngine.Predict (singleIssue);
+            // </SnippetPredictIssue>
+
+            // <SnippetDisplayResults>
+            Console.WriteLine ($"=============== Single Prediction - Result: {prediction.Area} ===============");
+            // </SnippetDisplayResults>
+
         }
 
     }
