@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.ML;
@@ -17,6 +18,7 @@ namespace Step2Issue {
         static void Main (string[] args) {
             _trainingDataView = _mlContext.Data.LoadFromTextFile<GitHubIssue> (
                 _trainDataPath, hasHeader : true);
+            var debug = _trainingDataView.Preview ();
 
             var pipeline = ProcessData ();
             var trainingPipeline = BuildAndTrainModel (_trainingDataView, pipeline);
@@ -33,6 +35,8 @@ namespace Step2Issue {
                     .FeaturizeText (
                         inputColumnName: "Description",
                         outputColumnName: "DescriptionFeaturized"))
+                .Append (_mlContext.Transforms
+                    .Concatenate ("Features", "TitleFeaturized", "DescriptionFeaturized"))
                 .AppendCacheCheckpoint (_mlContext);
 
             return pipeline;
@@ -45,6 +49,13 @@ namespace Step2Issue {
                     .SdcaMaximumEntropy ("Label", "Features"))
                 .Append (_mlContext.Transforms.Conversion
                     .MapKeyToValue ("PredictedLabel"));
+
+            // Train the model fitting to the DataSet
+            Stopwatch stopWatch = new Stopwatch ();
+            Console.WriteLine ($"=============== Training the model  ===============");
+            stopWatch.Start ();
+            _trainedModel = trainingPipeline.Fit (trainingDataView);
+            Console.WriteLine ($"=============== Finished Training the model Ending time: {stopWatch.ElapsedMilliseconds} ===============");
 
             return null;
         }
