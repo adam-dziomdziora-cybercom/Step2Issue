@@ -57,7 +57,14 @@ namespace Step2Issue {
             _trainedModel = trainingPipeline.Fit (trainingDataView);
             Console.WriteLine ($"=============== Finished Training the model Ending time: {stopWatch.ElapsedMilliseconds} ===============");
 
-            return null;
+            _predEngine = _mlContext.Model.CreatePredictionEngine<GitHubIssue, IssuePrediction> (_trainedModel);
+            GitHubIssue issue = new GitHubIssue () {
+                Title = "WebSockets communication is slow in my machine",
+                Description = "The WebSockets communication used under the covers by SignalR looks like is going slow in my development machine.."
+            };
+            var prediction = _predEngine.Predict (issue);
+
+            return trainingPipeline;
         }
 
     }
