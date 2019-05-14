@@ -22,6 +22,7 @@ namespace Step2Issue {
 
             var pipeline = ProcessData ();
             var trainingPipeline = BuildAndTrainModel (_trainingDataView, pipeline);
+            Evaluate (_trainingDataView.Schema);
 
         }
         public static IEstimator<ITransformer> ProcessData () {
@@ -63,8 +64,24 @@ namespace Step2Issue {
                 Description = "The WebSockets communication used under the covers by SignalR looks like is going slow in my development machine.."
             };
             var prediction = _predEngine.Predict (issue);
+            Console.WriteLine ($"=============== Single Prediction just-trained-model - Result: {prediction.Area} ===============");
 
             return trainingPipeline;
+        }
+
+        public static void Evaluate (DataViewSchema trainingDataViewSchema) {
+            var testDataView = _mlContext.Data.LoadFromTextFile<GitHubIssue> (_testDataPath, hasHeader : true);
+            var testMetrics = _mlContext.MulticlassClassification.Evaluate (_trainedModel.Transform (testDataView));
+            Console.WriteLine ($"=============== Evaluating to get model's accuracy metrics - Ending time: {DateTime.Now.ToString()} ===============");
+            Console.WriteLine ($"*************************************************************************************************************");
+            Console.WriteLine ($"*       Metrics for Multi-class Classification model - Test Data     ");
+            Console.WriteLine ($"*------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine ($"*       MicroAccuracy:    {testMetrics.MicroAccuracy:0.###}");
+            Console.WriteLine ($"*       MacroAccuracy:    {testMetrics.MacroAccuracy:0.###}");
+            Console.WriteLine ($"*       LogLoss:          {testMetrics.LogLoss:#.###}");
+            Console.WriteLine ($"*       LogLossReduction: {testMetrics.LogLossReduction:#.###}");
+            Console.WriteLine ($"*************************************************************************************************************");
+
         }
 
     }
