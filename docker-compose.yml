@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  step2issue:
+    image: ${DOCKER_REGISTRY-}step2issue
+    build:
+      context: .
+      dockerfile: Dockerfile

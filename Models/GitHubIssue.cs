@@ -1,17 +1,18 @@
 using Microsoft.ML.Data;
 
-namespace Step2Issue.Models {
-    public class GitHubIssue {
-        [LoadColumn (0)]
-        public string ID { get; set; }
+namespace Step2Issue.Models;
 
-        [LoadColumn (1)]
-        public string Area { get; set; }
+public class GitHubIssue
+{
+    [LoadColumn(0)]
+    public string ID { get; set; } = string.Empty;
 
-        [LoadColumn (2)]
-        public string Title { get; set; }
+    [LoadColumn(1)]
+    public string Area { get; set; } = string.Empty;
 
-        [LoadColumn (3)]
-        public string Description { get; set; }
-    }
+    [LoadColumn(2)]
+    public string Title { get; set; } = string.Empty;
+
+    [LoadColumn(3)]
+    public string Description { get; set; } = string.Empty;
 }
